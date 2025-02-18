@@ -10,51 +10,77 @@
  */
 class Solution {
     public ListNode swapNodes(ListNode head, int k) {
-        if (head == null || head.next == null) return head;  // Edge case: Empty or single node
+        if (head == null || head.next == null) return head; // Edge case: empty or single node list
 
-        ListNode first = head, second = head, firstPrev = null, secondPrev = null;
-        ListNode temp = head;
-        int length = 0;
+        ListNode start = head;
+        ListNode swap1 = null, prev1 = null;
+        ListNode swap2 = null, prev2 = null;
+        ListNode temp;
+        int counter = 1;
+        int len = 0;
 
-        // Find the length of the list
-        while (temp != null) {
-            length++;
-            temp = temp.next;
+        // First pass: Find swap1 (k-th node from start) and calculate the length of the list
+        ListNode curr = head;
+        while (curr != null) {
+            if (counter == k) {
+                swap1 = curr;
+            }
+            if (counter == k - 1) {
+                prev1 = curr;
+            }
+            curr = curr.next;
+            counter++;
+        }
+        len = counter - 1; // Corrected length calculation
+
+        // Second pass: Find swap2 (k-th node from end)
+        counter = 1;
+        curr = head;
+        while (curr != null) {
+            if (counter == len - k + 1) {
+                swap2 = curr;
+            }
+            if (counter == (len - k)) {
+                prev2 = curr;
+            }
+            curr = curr.next;
+            counter++;
         }
 
-        if (k > length) return head;  // Edge case: k is out of bounds
-
-        // Find the k-th node from the beginning
-        temp = head;
-        for (int i = 1; i < k; i++) {
-            firstPrev = temp;
-            temp = temp.next;
+        // If both nodes are the same, no swap needed
+        if (swap1 == swap2) {
+            return head;
         }
-        first = temp;
 
-        // Find the k-th node from the end (length - k + 1)
-        temp = head;
-        for (int i = 1; i < length - k + 1; i++) {
-            secondPrev = temp;
-            temp = temp.next;
+        // If k = 1 or k = length, we are swapping the first or last element
+        if (prev1 == null) { // swap1 is head
+            head = swap2;
         }
-        second = temp;
+        if (prev2 == null) { // swap2 is head
+            head = swap1;
+        }
 
-        // If both nodes are the same, no need to swap
-        if (first == second) return head;
+        // Case: If swap1 and swap2 are adjacent
+        if (swap1.next == swap2) {
+            if (prev1 != null) prev1.next = swap2;
+            swap1.next = swap2.next;
+            swap2.next = swap1;
+            return head;
+        }
+        if (swap2.next == swap1) {
+            if (prev2 != null) prev2.next = swap1;
+            swap2.next = swap1.next;
+            swap1.next = swap2;
+            return head;
+        }
 
-        // Swap nodes
-        if (firstPrev != null) firstPrev.next = second;
-        if (secondPrev != null) secondPrev.next = first;
-
-        // Swap next pointers
-        ListNode tempNext = first.next;
-        first.next = second.next;
-        second.next = tempNext;
-
-        // If swapping head node, update head
-        if (first == head) return second;
-        if (second == head) return first;
+        // General Case: Swapping non-adjacent nodes
+        if (prev1 != null) prev1.next = swap2;
+        if (prev2 != null) prev2.next = swap1;
+        
+        temp = swap1.next;
+        swap1.next = swap2.next;
+        swap2.next = temp;
 
         return head;
     }
